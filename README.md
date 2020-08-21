@@ -20,7 +20,7 @@ A Visual Basic 6 IDE Add-In
 
 ## Limitations
 
-*"Open Containing Folder" functionality assumes that
+* "Open Containing Folder" functionality assumes that
     * the file name and the project item name are equal
     * all files used in the project reside in the same folder as the project file
     * if it does not find the file, it will insrtuct Explorer to open the project folder.
