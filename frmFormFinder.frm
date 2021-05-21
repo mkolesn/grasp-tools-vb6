@@ -4,11 +4,27 @@ Begin VB.Form frmFormFinder
    ClientHeight    =   5070
    ClientLeft      =   2190
    ClientTop       =   1950
-   ClientWidth     =   5385
+   ClientWidth     =   6945
    LinkTopic       =   "Form1"
    ScaleHeight     =   5070
-   ScaleWidth      =   5385
+   ScaleWidth      =   6945
    StartUpPosition =   2  'CenterScreen
+   Begin VB.CommandButton cmdCopyCaption 
+      Caption         =   "Copy Item Caption"
+      Height          =   495
+      Left            =   5400
+      TabIndex        =   9
+      Top             =   720
+      Width           =   1095
+   End
+   Begin VB.CommandButton cmdCopyName 
+      Caption         =   "Copy Item Name"
+      Height          =   495
+      Left            =   5400
+      TabIndex        =   8
+      Top             =   120
+      Width           =   1095
+   End
    Begin VB.CommandButton cmdOpenExplorer 
       Caption         =   "Open Containing Folder"
       Height          =   495
@@ -89,29 +105,6 @@ Public Connect As Connect
 
 Private FormList() As FormFindInfo
 
-Private Sub cmdLoadCaptions_Click()
-    If lstForms.ListCount > 0 Then
-        LoadCaptions lstForms
-    End If
-End Sub
-
-Private Sub cmdOpenExplorer_Click()
-    Dim i As Integer
-    
-    If lstForms.ListCount = 1 Then
-        ' There is only one item in the Listbox. Navigate to its file location
-        i = 0
-    Else
-        i = lstForms.listIndex
-    End If
-    
-    If i <> -1 Then
-        With VBInstance.ActiveVBProject.VBComponents.Item(lstForms.ItemData(i))
-            OpenContainingFolder VBInstance, .Name, .Type
-        End With
-    End If
-End Sub
-
 Private Sub Form_Load()
     InitializeFormList
     FillList lstForms, sFilter:=""
@@ -149,6 +142,59 @@ Private Sub cmdShowDesigner_Click()
         VBInstance.ActiveVBProject.VBComponents.Item(lstForms.ItemData(i)).Activate
     ElseIf lstForms.ListCount = 1 Then
         VBInstance.ActiveVBProject.VBComponents.Item(lstForms.ItemData(0)).Activate
+    Else
+        MsgBox "Select an item in the list", vbExclamation
+    End If
+End Sub
+
+Private Sub cmdLoadCaptions_Click()
+    If lstForms.ListCount > 0 Then
+        LoadCaptions lstForms
+    End If
+End Sub
+
+Private Sub cmdOpenExplorer_Click()
+    Dim i As Integer
+    
+    If lstForms.ListCount = 1 Then
+        ' There is only one item in the Listbox. Navigate to its file location
+        i = 0
+    Else
+        i = lstForms.listIndex
+    End If
+    
+    If i <> -1 Then
+        With VBInstance.ActiveVBProject.VBComponents.Item(lstForms.ItemData(i))
+            OpenContainingFolder VBInstance, .Name, .Type
+        End With
+    End If
+End Sub
+
+Private Sub cmdCopyName_Click()
+    Dim i As Integer
+    
+    i = lstForms.listIndex
+    If i <> -1 Then
+        Clipboard.Clear
+        Clipboard.SetText VBInstance.ActiveVBProject.VBComponents.Item(lstForms.ItemData(i)).Name
+    ElseIf lstForms.ListCount = 1 Then
+        Clipboard.Clear
+        Clipboard.SetText VBInstance.ActiveVBProject.VBComponents.Item(lstForms.ItemData(i)).Name
+    Else
+        MsgBox "Select an item in the list", vbExclamation
+    End If
+End Sub
+
+Private Sub cmdCopyCaption_Click()
+    Dim i As Integer
+    
+    i = lstForms.listIndex
+    If i <> -1 Then
+        Clipboard.Clear
+        Clipboard.SetText VBInstance.ActiveVBProject.VBComponents.Item(lstForms.ItemData(i)).Properties("Caption").Value
+    ElseIf lstForms.ListCount = 1 Then
+        Clipboard.Clear
+        Clipboard.SetText VBInstance.ActiveVBProject.VBComponents.Item(lstForms.ItemData(i)).Properties("Caption").Value
     Else
         MsgBox "Select an item in the list", vbExclamation
     End If
