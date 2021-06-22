@@ -42,19 +42,31 @@ Public WithEvents OpenMDIFormHandler As CommandBarEvents
 Attribute OpenMDIFormHandler.VB_VarHelpID = -1
 Private OpenMDIFormCBar As Office.CommandBarControl
 
+Public WithEvents ShowProjectPathHandler As CommandBarEvents
+Attribute ShowProjectPathHandler.VB_VarHelpID = -1
+Private ShowProjectPathCBar As Office.CommandBarControl
+
 Public WithEvents OpenContainingFolderHandler As CommandBarEvents
 Attribute OpenContainingFolderHandler.VB_VarHelpID = -1
-Private ExploreInFolderCBar   As Office.CommandBarControl
+Private ExploreInFolderCBar As Office.CommandBarControl
 
 Public WithEvents ProjFormsOpenContainingFolderHandler As CommandBarEvents
 Attribute ProjFormsOpenContainingFolderHandler.VB_VarHelpID = -1
-Private ProjFormsExploreInFolderCBar   As Office.CommandBarControl
+Private ProjFormsExploreInFolderCBar As Office.CommandBarControl
 
 Public WithEvents ProjModulesOpenContainingFolderHandler As CommandBarEvents
 Attribute ProjModulesOpenContainingFolderHandler.VB_VarHelpID = -1
-Private ProjModulesExploreInFolderCBar   As Office.CommandBarControl
+Private ProjModulesExploreInFolderCBar As Office.CommandBarControl
 
-Private mfrmFormFinder        As New frmFormFinder
+Public WithEvents ProjFormsCopyNameHandler As CommandBarEvents
+Attribute ProjFormsCopyNameHandler.VB_VarHelpID = -1
+Private ProjFormsCopyNameCBar As Office.CommandBarControl
+
+Public WithEvents ProjModulesCopyNameHandler As CommandBarEvents
+Attribute ProjModulesCopyNameHandler.VB_VarHelpID = -1
+Private ProjModulesCopyNameCBar As Office.CommandBarControl
+
+Private mfrmFormFinder As New frmFormFinder
 
 Sub Hide()
     On Error Resume Next
@@ -87,20 +99,28 @@ Private Sub AddinInstance_OnConnection(ByVal Application As Object, ByVal Connec
         Set OpenMDIFormCBar = AddToCommandBar("Open MDI Form (If Present)", "fvba_OpenMDIForm", "Tools")
         Set Me.OpenMDIFormHandler = VBInstance.Events.CommandBarEvents(OpenMDIFormCBar)
         
+        Set ShowProjectPathCBar = AddToCommandBar("Show Project Path", "", "Tools")
+        Set Me.ShowProjectPathHandler = VBInstance.Events.CommandBarEvents(ShowProjectPathCBar)
+        
         Set ExploreInFolderCBar = AddToCommandBar("Open Containing Folder of Active CodePane", "fvba_OpenContainingFolder", "Window")
         Set Me.OpenContainingFolderHandler = VBInstance.Events.CommandBarEvents(ExploreInFolderCBar)
         
         Set ProjFormsExploreInFolderCBar = AddToCommandBar("Open Containing Folder", "fvba_ProjFormsOpenContainingFolder", "Project Window Form Folder")
         Set Me.ProjFormsOpenContainingFolderHandler = VBInstance.Events.CommandBarEvents(ProjFormsExploreInFolderCBar)
-        
+
         Set ProjModulesExploreInFolderCBar = AddToCommandBar("Open Containing Folder", "fvba_ProjModulesOpenContainingFolder", "Project Window Module/Class Folder")
         Set Me.ProjModulesOpenContainingFolderHandler = VBInstance.Events.CommandBarEvents(ProjModulesExploreInFolderCBar)
+        
+        Set ProjFormsCopyNameCBar = AddToCommandBar("Copy Name to Clipboard", "", "Project Window Form Folder")
+        Set Me.ProjFormsCopyNameHandler = VBInstance.Events.CommandBarEvents(ProjFormsCopyNameCBar)
+    
+        Set ProjModulesCopyNameCBar = AddToCommandBar("Copy Name to Clipboard", "", "Project Window Module/Class Folder")
+        Set Me.ProjModulesCopyNameHandler = VBInstance.Events.CommandBarEvents(ProjModulesCopyNameCBar)
     End If
 
     Exit Sub
     
 error_handler:
-    
     MsgBox Err.Description
 End Sub
 
@@ -115,9 +135,12 @@ Private Sub AddinInstance_OnDisconnection(ByVal RemoveMode As AddInDesignerObjec
     FindFormsCBar.Delete
     OpenStartUpObjectCBar.Delete
     OpenMDIFormCBar.Delete
+    ShowProjectPathCBar.Delete
     ExploreInFolderCBar.Delete
     ProjFormsExploreInFolderCBar.Delete
     ProjModulesExploreInFolderCBar.Delete
+    ProjFormsCopyNameCBar.Delete
+    ProjModulesCopyNameCBar.Delete
 
     'shut down the Add-In
     If FormDisplayed Then
@@ -148,12 +171,22 @@ Private Sub OpenContainingFolderHandler_Click(ByVal CommandBarControl As Object,
     ActiveCodePaneOpenContainingFolder VBInstance
 End Sub
 
+Private Sub ProjFormsCopyNameHandler_Click(ByVal CommandBarControl As Object, handled As Boolean, CancelDefault As Boolean)
+    Clipboard.Clear
+    Clipboard.SetText VBInstance.SelectedVBComponent.Name
+End Sub
+
 Private Sub ProjFormsOpenContainingFolderHandler_Click(ByVal CommandBarControl As Object, handled As Boolean, CancelDefault As Boolean)
     If Not VBInstance.SelectedVBComponent Is Nothing Then
         With VBInstance.SelectedVBComponent
             OpenContainingFolder VBInstance, .Name, .Type
         End With
     End If
+End Sub
+
+Private Sub ProjModulesCopyNameHandler_Click(ByVal CommandBarControl As Object, handled As Boolean, CancelDefault As Boolean)
+    Clipboard.Clear
+    Clipboard.SetText VBInstance.SelectedVBComponent.Name
 End Sub
 
 Private Sub ProjModulesOpenContainingFolderHandler_Click(ByVal CommandBarControl As Object, handled As Boolean, CancelDefault As Boolean)
@@ -202,3 +235,6 @@ Private Sub ShowFormFinder()
     mfrmFormFinder.Show
 End Sub
 
+Private Sub ShowProjectPathHandler_Click(ByVal CommandBarControl As Object, handled As Boolean, CancelDefault As Boolean)
+    MsgBox VBInstance.ActiveVBProject.FileName, vbInformation, "Active Project Path"
+End Sub
